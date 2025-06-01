@@ -1,23 +1,52 @@
+import { login } from '@/mockApi/auth';
 import Checkbox from 'expo-checkbox';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 
 const TextInputExample = () => {
-  const [cpf, setCpf] = React.useState('');
-  const [senha, setSenha] = React.useState('');
+  const [emailOrCnpj, setEmailOrCnpj] = useState('');
+  const [senha, setSenha] = useState('');
   const [lembrarMe, setLembrarMe] = useState(false);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
-  const handleLogin = () => {
-    if (!cpf.trim() || !senha.trim()) {
+  const handleLogin = async () => {
+    if (!emailOrCnpj.trim() || !senha.trim()) {
+      Alert.alert('Atenção', 'Por favor, preencha o email/CNPJ e a senha.');
       return;
     }
-    router.push('/menuScreen');
+
+    setIsLoading(true);
+
+    try {
+      const response = await login(emailOrCnpj, senha);
+
+      if (response.success && response.user) {
+        Alert.alert('Sucesso!', `Bem-vindo, ${response.user.name}!`);
+        router.replace('/menuScreen');
+      } else {
+        Alert.alert('Falha no Login', response.message || 'Email ou senha inválidos.');
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer login. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,10 +61,12 @@ const TextInputExample = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            onChangeText={setCpf}
-            value={cpf}
+            onChangeText={setEmailOrCnpj}
+            value={emailOrCnpj}
             placeholder="Email/CNPJ"
             placeholderTextColor="#fff"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
         </View>
 
@@ -48,8 +79,14 @@ const TextInputExample = () => {
             placeholderTextColor="#fff"
             secureTextEntry={!senhaVisivel}
           />
-          <TouchableOpacity onPress={() => setSenhaVisivel(!senhaVisivel)} style={styles.eyeIcon}>
-            <Icon name={senhaVisivel ? 'eye' : 'eye-off'} size={24} color="#fff" />
+          <TouchableOpacity
+            onPress={() => setSenhaVisivel(!senhaVisivel)}
+            style={styles.eyeIcon}>
+            <Icon
+              name={senhaVisivel ? 'eye' : 'eye-off'}
+              size={24}
+              color="#fff"
+            />
           </TouchableOpacity>
         </View>
 
@@ -64,19 +101,36 @@ const TextInputExample = () => {
               width: 22,
               height: 22,
               borderRadius: 4,
+              marginRight: 8,
             }}
+            color={lembrarMe ? '#007bff' : undefined}
           />
           <Text style={styles.checkboxLabel}>Lembrar-me</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            isLoading ? { opacity: 0.6 } : null
+          ]}
+          onPress={handleLogin}
+          activeOpacity={0.8}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Entrar</Text>
+          )}
         </TouchableOpacity>
 
         <Text style={styles.forgotPassword}>
           Esqueceu sua senha?
-          <Text style={styles.clickHere} onPress={() => router.push('/recuperacaoSenhaScreen')}>
-            Clique aqui
+          <Text
+            style={styles.clickHere}
+            onPress={() => { if (!isLoading) router.push('/recuperacaoSenhaScreen'); }}
+          >
+            {' '}Clique aqui
           </Text>
         </Text>
       </SafeAreaView>
@@ -94,19 +148,18 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-  position: 'absolute',
-  top: 30,
-  transform: [{ translateX: -20 }], 
-  zIndex: 1,
-  alignItems: 'center',
-  width: '100%',
-},
-
+    position: 'absolute',
+    top: 30,
+    transform: [{ translateX: -20 }],
+    zIndex: 1,
+    alignItems: 'center',
+    width: '100%',
+  },
 
   logo: {
-    width: 280, 
-    height: 180, 
-    resizeMode: 'contain', 
+    width: 280,
+    height: 180,
+    resizeMode: 'contain',
   },
 
   title: {

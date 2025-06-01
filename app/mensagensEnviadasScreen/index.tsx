@@ -14,6 +14,9 @@ export default function MensagemFormScreen() {
 
   return (
     <View style={styles.container}>
+   
+
+
       <View style={styles.logoContainer}>
         <Image
           source={require('./assets/logo.png')}
@@ -47,6 +50,7 @@ export default function MensagemFormScreen() {
         />
       </View>
 
+
       <View style={styles.textAreaContainer}>
         <Text style={styles.label}>Mensagem:</Text>
         <TextInput
@@ -57,7 +61,8 @@ export default function MensagemFormScreen() {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => {  }}>
+
+      <TouchableOpacity style={styles.button} onPress={() => { /* lógica de envio */ }}>
         <Text style={styles.buttonText}>Enviar</Text>
       </TouchableOpacity>
     </View>

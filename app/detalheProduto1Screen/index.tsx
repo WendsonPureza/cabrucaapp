@@ -4,7 +4,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function App() {
-  const router = useRouter();
+   const router = useRouter();
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -16,6 +16,8 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+    
+
       <Image 
         source={require('./assets/logo.png')} 
         style={styles.externalLogo}
@@ -49,6 +51,7 @@ export default function App() {
           <Text style={styles.dataLabel}>- Tipo de embalagem gramatura</Text>
         </View>
         <View style={styles.divider} />
+
 
         <TouchableOpacity style={styles.buyButton} onPress={() => router.push('/pedirProduto1Screen')}>
           <Text style={styles.buyButtonText}>Comprar</Text>

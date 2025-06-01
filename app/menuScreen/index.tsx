@@ -1,21 +1,26 @@
 import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function MenuScreen() {
-  const router = useRouter();
 
+export default function MenuScreen() {
+       const router = useRouter();
+    
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
+
+
+          
+
+       <View style={styles.imageContainer}>
         <Image source={require('./assets/image.png')} style={styles.logoImage} />
       </View>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/pedidosScreen')}>
         <Text style={styles.buttonText}>Pedidos</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/produtosScreen')}>
-        <Text style={styles.buttonText}>Produtos</Text>
-      </TouchableOpacity>
+<TouchableOpacity style={styles.button} onPress={() => router.push('/produtosScreen')}>
+  <Text style={styles.buttonText}>Produtos</Text>
+</TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push('/relatorioEventosScreen')}>
         <Text style={styles.buttonText}>Relatório</Text>
@@ -37,13 +42,13 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'absolute',
-    top: 50, // Ajuste a posição vertical
+    top: 50, 
     zIndex: 1,
     alignItems: 'center',
   },
   logoImage: {
-    width: 300,  // Aumenta o tamanho da logo
-    height: 150, // Aumenta o tamanho da logo
+    width: 300,  
+    height: 150, 
     resizeMode: 'contain',
     marginBottom: 10,
   },
