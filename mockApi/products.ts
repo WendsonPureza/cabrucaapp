@@ -4,28 +4,55 @@ export interface Product {
   id: string;
   name: string;
   brandDetails: string;
-  imageName: string; // Nome do arquivo da imagem em ./assets (ex: 'meioamargoamaro.png')
-  description_detail: string; // A descrição longa para a tela de detalhes
-  // Detalhes que podem aparecer na tela de "Detalhe do Produto"
+  imageName: string;
+  description_detail: string;
   characteristics?: string[];
   lactoseInfo?: string;
   sugarType?: string;
   glutenInfo?: string;
   availability?: string;
   leadTime?: string;
-  shelfLife?: string; // Validade
+  shelfLife?: string;
   certificates?: string[];
   awards?: string[];
   packagingType?: string;
-  // Valores padrão para a tela de "Pedir Produto"
   defaultExchange?: string;
   defaultPriceFob?: string;
   defaultQuantity?: string;
-  defaultTotalValue?: string; // Pode ser calculado ou um valor inicial
+  defaultTotalValue?: string;
   defaultBox?: string;
 }
 
-// Interfaces para as respostas das funções de buscar produtos
+// --- Interfaces relacionadas a Pedidos ---
+export interface OrderProductItem { // Detalhe de um produto DENTRO de um pedido
+  productId: string;
+  name: string;      // Nome do produto no momento do pedido
+  quantity: number;
+  priceFob?: string;  // Preço no momento do pedido
+}
+
+export interface Order { // Estrutura de um Pedido completo
+  id: string;           // ID único do pedido
+  data: string;         // Data do pedido (string formatada)
+  status: string;       // Ex: 'Pedido pendente', 'Pedido finalizado'
+  corStatus: string;    // Cor para o status
+  produtos: OrderProductItem[]; // Lista de produtos neste pedido
+  produtor: string;     // Nome do cliente/solicitante (quem fez o pedido)
+  totalOrderValue?: string; // Valor total do pedido
+  exchangeRate?: string;    // Câmbio usado
+}
+
+export interface OrderDetails { // Dados que vêm do formulário PedirProdutoScreen
+  productId: string;
+  productName?: string;
+  exchangeRate?: string;
+  priceFob?: string;
+  quantity: number | string; // Pode vir como string do input
+  totalValue?: string;
+  boxCount?: number | string;
+  requestedBy?: string; // Identificador de quem está fazendo o pedido
+}
+
 interface GetProductsResponse {
   success: boolean;
   products: Product[];
@@ -38,158 +65,145 @@ interface GetProductByIdResponse {
   message?: string;
 }
 
-// Interface para os detalhes do pedido que serão enviados pela tela de pedido
-export interface OrderDetails {
-  productId: string;
-  productName?: string; // Útil para logs ou confirmação
-  exchangeRate?: string;
-  priceFob?: string;
-  quantity: number | string; // O input pode ser string, converter para número ao processar
-  totalValue?: string;      // Pode ser string vinda do input ou calculada
-  boxCount?: number | string;   // O input pode ser string
-}
-
-// Interface para a resposta da função de fazer pedido
 interface PlaceOrderResponse {
   success: boolean;
   message: string;
   orderId?: string;
+  order?: Order; // Adicionado para retornar o pedido criado
 }
 
-// SEU "BANCO DE DADOS" MOCKADO DE PRODUTOS
+interface GetOrdersResponse { // Nova interface para a resposta de buscar pedidos
+  success: boolean;
+  orders: Order[];
+  message?: string;
+}
+
+// "Banco de dados" mockado de Produtos (seu array allMockProducts existente)
 const allMockProducts: Product[] = [
+  { id: 'prod1', name: 'Chocolate meio amargo', brandDetails: 'Lacta Amaro - 40% cacau', imageName: 'meioamargoamaro.png', description_detail: 'Experimente a intensidade...', defaultExchange: 'USD', defaultPriceFob: '0.85', defaultQuantity: '90', defaultTotalValue: '76,50', defaultBox: '1', characteristics: ['Sabor intenso'], lactoseInfo: 'Contém lactose', sugarType: 'Açúcares', glutenInfo: 'Pode conter', availability: '1000 cx', leadTime: '3-5d', shelfLife: '12m', certificates: ['Qualidade'], awards: ['Sabor'], packagingType: '80g' },
+  { id: 'prod2', name: 'Chocolate Amargo Especial 70%', brandDetails: 'Lacta Amaro - 70% cacau', imageName: 'amaro2.png', description_detail: 'Para os paladares mais apurados...', defaultExchange: 'USD', defaultPriceFob: '1.20', defaultQuantity: '50', defaultTotalValue: '60,00', defaultBox: '1', characteristics: ['70% Cacau'], lactoseInfo: 'Sem lactose', sugarType: 'Baixo teor', glutenInfo: 'Sem glúten', availability: '500 cx', leadTime: '4-6d', shelfLife: '18m', certificates: ['Orgânico'], awards: [], packagingType: '100g' },
+  { id: 'prod3', name: 'Chocolate ao leite Lacta', brandDetails: 'Lacta Clássicos - 80g', imageName: 'aoleite.png', description_detail: 'O inconfundível sabor...', defaultExchange: 'USD', defaultPriceFob: '0.75', defaultQuantity: '120', defaultTotalValue: '90,00', defaultBox: '1', characteristics: ['Cremoso'], lactoseInfo: 'Contém lactose', sugarType: 'Açúcares', glutenInfo: 'Pode conter', availability: '2000 cx', leadTime: '2-4d', shelfLife: '10m', certificates: ['Qualidade'], awards: ['Mais Vendido'], packagingType: '80g' },
+  { id: 'prod4', name: 'Chocolate Branco Demeter', brandDetails: 'Demeter Chocolates Especiais', imageName: 'demeter.png', description_detail: 'A suavidade do chocolate...', defaultExchange: 'EUR', defaultPriceFob: '1.10', defaultQuantity: '70', defaultTotalValue: '77,00', defaultBox: '1', characteristics: ['Branco Premium'], lactoseInfo: 'Contém lactose', sugarType: 'Açúcares', glutenInfo: 'Pode conter', availability: '300 cx', leadTime: '5-7d', shelfLife: '9m', certificates: ['Artesanal'], awards: [], packagingType: '90g' },
+];
+
+// Array em memória para armazenar os pedidos feitos
+const mockAllOrders: Order[] = [
+  // Seus pedidos de exemplo iniciais da PedidosScreen
   {
-    id: 'prod1',
-    name: 'Chocolate meio amargo',
-    brandDetails: 'Lacta Amaro - 40% cacau',
-    imageName: 'meioamargoamaro.png',
-    description_detail: 'Experimente a intensidade e a sofisticação do Chocolate Meio Amargo Lacta Amaro 40% Cacau. Com 80g de puro prazer, esta barra é ideal para os amantes de um sabor mais marcante, equilibrando o amargor do cacau com uma doçura sutil. Perfeito para degustar a qualquer momento ou para adicionar um toque especial às suas receitas de sobremesas.',
-    characteristics: ['Sabor intenso', '40% Cacau', 'Barra de 80g', 'Ideal para receitas'],
-    lactoseInfo: 'Contém lactose. Contém derivados de leite e soja.',
-    sugarType: 'Açúcares (sacarose)',
-    glutenInfo: 'Pode conter traços de trigo, cevada, amendoim, avelã e látex natural.',
-    availability: '1000 caixas (90 unidades/caixa)',
-    leadTime: '3-5 dias úteis para entrega',
-    shelfLife: '12 meses a partir da data de fabricação',
-    certificates: ['Selo de Qualidade Lacta', 'ABICAB'],
-    awards: ['Melhor Sabor Intenso 2023 (Revista Paladar)'],
-    packagingType: 'Embalagem individual de 80g, caixa com 90 unidades',
-    defaultExchange: 'USD', // Dólar Americano
-    defaultPriceFob: '0.85', // Preço por unidade
-    defaultQuantity: '90',   // Quantidade de unidades (1 caixa)
-    defaultTotalValue: '76,50', // 0.85 * 90 (Exemplo, pode ser calculado na tela)
-    defaultBox: '1',
+    id: 'mockOrd1',
+    data: '6 de julho, 2025',
+    status: 'Pedido pendente',
+    corStatus: '#FF2D2D',
+    produtos: [
+      { productId: 'prod1', name: 'Chocolate dark 40%', quantity: 10, priceFob: '0.85' },
+      { productId: 'prod3', name: 'Chocolate ao leite', quantity: 10, priceFob: '0.75' },
+    ],
+    produtor: '(nomeprodutor)',
+    totalOrderValue: "16,00",
+    exchangeRate: "USD",
   },
   {
-    id: 'prod2',
-    name: 'Chocolate Amargo Especial 70%',
-    brandDetails: 'Lacta Amaro - 70% cacau',
-    imageName: 'amaro2.png',
-    description_detail: 'Para os paladares mais apurados, o Chocolate Amargo Especial Lacta Amaro com 70% de cacau oferece uma experiência sensorial única. Notas profundas de cacau com um final prolongado. Ideal para harmonizar com cafés ou vinhos.',
-    characteristics: ['Extra Amargo', '70% Cacau', 'Notas frutadas', 'Barra de 100g'],
-    lactoseInfo: 'Pode conter traços de lactose',
-    sugarType: 'Baixo teor de açúcar',
-    glutenInfo: 'Não contém glúten',
-    availability: '500 caixas (50 unidades/caixa)',
-    leadTime: '4-6 dias úteis',
-    shelfLife: '18 meses',
-    certificates: ['Certificado de Origem do Cacau'],
-    awards: [],
-    packagingType: 'Embalagem individual de 100g, caixa com 50 unidades',
-    defaultExchange: 'USD',
-    defaultPriceFob: '1.20',
-    defaultQuantity: '50',
-    defaultTotalValue: '60,00',
-    defaultBox: '1',
-  },
-  {
-    id: 'prod3',
-    name: 'Chocolate ao leite Lacta',
-    brandDetails: 'Lacta Clássicos - 80g',
-    imageName: 'aoleite.png',
-    description_detail: 'O inconfundível sabor do Chocolate ao Leite Lacta, com sua cremosidade e doçura na medida certa. Perfeito para compartilhar ou para aquele momento só seu. A barra de 80g é ideal para matar a vontade de chocolate.',
-    characteristics: ['Cremoso', 'Ao Leite Tradicional', 'Barra de 80g', 'Sabor Clássico'],
-    lactoseInfo: 'Contém lactose. Contém derivados de leite e soja.',
-    sugarType: 'Açúcares (sacarose)',
-    glutenInfo: 'Pode conter traços de trigo e cevada.',
-    availability: '2000 caixas (120 unidades/caixa)',
-    leadTime: '2-4 dias úteis',
-    shelfLife: '10 meses',
-    certificates: ['Selo de Qualidade Lacta'],
-    awards: ['Mais Vendido 2023'],
-    packagingType: 'Embalagem individual de 80g, caixa com 120 unidades',
-    defaultExchange: 'USD',
-    defaultPriceFob: '0.75',
-    defaultQuantity: '120',
-    defaultTotalValue: '90,00',
-    defaultBox: '1',
-  },
-  {
-    id: 'prod4',
-    name: 'Chocolate Branco Demeter',
-    brandDetails: 'Demeter Chocolates Especiais',
-    imageName: 'demeter.png',
-    description_detail: 'A suavidade do chocolate branco premium da Demeter, elaborado com manteiga de cacau de alta qualidade e um toque de baunilha. Uma experiência delicada e envolvente para os apreciadores de chocolate branco.',
-    characteristics: ['Chocolate Branco Premium', 'Suave', 'Notas de Baunilha', 'Barra de 90g'],
-    lactoseInfo: 'Contém lactose.',
-    sugarType: 'Açúcares',
-    glutenInfo: 'Pode conter traços de glúten.',
-    availability: '300 caixas (70 unidades/caixa)',
-    leadTime: '5-7 dias úteis',
-    shelfLife: '9 meses',
-    certificates: ['Selo de Ingredientes Selecionados Demeter'],
-    awards: [],
-    packagingType: 'Embalagem individual de 90g, caixa com 70 unidades',
-    defaultExchange: 'EUR', // Euro
-    defaultPriceFob: '1.10', // Preço em Euro
-    defaultQuantity: '70',
-    defaultTotalValue: '77,00', // Em Euro
-    defaultBox: '1',
+    id: 'mockOrd2',
+    data: '10 de maio, 2025',
+    status: 'Pedido finalizado',
+    corStatus: '#00FF88',
+    produtos: [
+      { productId: 'prod1', name: 'Chocolate dark 40%', quantity: 11, priceFob: '0.85' },
+    ],
+    produtor: '(nomeprodutor)', // Ajustado para diferenciar
+    totalOrderValue: "9,35",
+    exchangeRate: "USD",
   },
 ];
 
-// Função para buscar todos os produtos
+// Suas funções getMockProducts e getMockProductById existentes (mantenha-as como estão)
 export const getMockProducts = (): Promise<GetProductsResponse> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log('[MOCK API products.ts] Retornando todos os produtos.');
-      resolve({
-        success: true,
-        products: [...allMockProducts], // Retorna uma cópia
-      });
-    }, 300); // Reduzi o delay para teste
+      resolve({ success: true, products: [...allMockProducts] });
+    }, 300);
   });
 };
 
-// Função para buscar um produto específico pelo ID
 export const getMockProductById = (productId: string): Promise<GetProductByIdResponse> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const product = allMockProducts.find(p => p.id === productId);
       if (product) {
         console.log(`[MOCK API products.ts] Produto encontrado por ID (${productId}).`);
-        resolve({ success: true, product: { ...product } }); // Retorna uma cópia
+        resolve({ success: true, product: { ...product } });
       } else {
         console.log(`[MOCK API products.ts] Produto com ID (${productId}) NÃO encontrado.`);
         resolve({ success: false, message: 'Produto não encontrado.' });
       }
-    }, 200); // Reduzi o delay
+    }, 200);
   });
 };
 
-// Função para simular um pedido
+// MODIFICADA: Função para "fazer" um pedido e ADICIONAR à lista mockAllOrders
 export const placeMockOrder = (orderDetails: OrderDetails): Promise<PlaceOrderResponse> => {
   return new Promise(resolve => {
     setTimeout(() => {
-        const orderId = `ORD-MOCK-${Date.now()}`;
-        console.log("[MOCK API products.ts] Pedido recebido:", { orderId, ...orderDetails });
-        // Aqui você poderia, se quisesse, diminuir o 'availability' do produto mockado,
-        // mas lembre-se que isso só persistiria na memória durante a sessão do app.
-        resolve({
-            success: true,
-            message: `Pedido para '${orderDetails.productName || 'produto selecionado'}' mockado com sucesso!\nID do Pedido: ${orderId}`,
-            orderId: orderId
-        });
+      const productInfo = allMockProducts.find(p => p.id === orderDetails.productId);
+      if (!productInfo) {
+        // Este log ajuda a ver se o produto foi encontrado para criar o pedido
+        console.error("[MOCK API products.ts] Erro em placeMockOrder: Produto base do pedido não encontrado. ID:", orderDetails.productId);
+        resolve({ success: false, message: "Produto base do pedido não encontrado no mock." });
+        return;
+      }
+
+      const orderId = `ORD-MOCK-${Date.now()}${Math.floor(Math.random()*100)}`;
+      const newOrder: Order = {
+        id: orderId,
+        data: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        status: 'Pedido pendente', // Status inicial
+        corStatus: '#FF2D2D',     // Cor para pendente
+        produtos: [ // Simplesmente adiciona o produto que foi pedido
+          {
+            productId: orderDetails.productId,
+            name: productInfo.name, // Usa o nome do produto encontrado
+            quantity: Number(orderDetails.quantity), // Garante que é número
+            priceFob: orderDetails.priceFob,
+          },
+        ],
+        // O campo 'produtor' aqui seria quem fez o pedido.
+        // Se o app é de admin, e ele faz pedido PARA um produtor,
+        // o 'requestedBy' do orderDetails deveria ser o nome/ID desse produtor.
+        // Se o app é de produtor, seria o nome/ID do produtor logado.
+        produtor: orderDetails.requestedBy || "(Admin/Usuário do App)",
+        totalOrderValue: orderDetails.totalValue,
+        exchangeRate: orderDetails.exchangeRate,
+      };
+
+      mockAllOrders.unshift(newOrder); // Adiciona o novo pedido NO INÍCIO da lista
+
+      console.log("[MOCK API products.ts] Novo Pedido ADICIONADO à Lista:", JSON.stringify(newOrder, null, 2));
+      console.log("[MOCK API products.ts] Total de Pedidos Agora:", mockAllOrders.length);
+      resolve({
+        success: true,
+        message: `Pedido para '${productInfo.name}' recebido com sucesso!\nID do Pedido: ${orderId}`,
+        orderId: orderId,
+        order: newOrder, // Retorna o pedido criado
+      });
     }, 600);
-  })
+  });
+};
+
+// NOVA FUNÇÃO: Para buscar todos os pedidos
+export const getMockOrders = (filterByUser?: string): Promise<GetOrdersResponse> => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      let ordersToReturn = [...mockAllOrders];
+      if (filterByUser) {
+        // Se você quiser filtrar pedidos por quem os fez (o campo 'produtor' no objeto Order)
+        ordersToReturn = ordersToReturn.filter(order => order.produtor === filterByUser);
+      }
+      console.log(`[MOCK API products.ts] Retornando ${ordersToReturn.length} pedidos.`);
+      resolve({
+        success: true,
+        orders: ordersToReturn, // Retorna a lista (mais novos primeiro devido ao unshift)
+      });
+    }, 400);
+  });
 };

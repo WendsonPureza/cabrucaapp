@@ -1,4 +1,3 @@
-
 import { sendMockMessage } from '@/mockApi/messages';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -7,10 +6,9 @@ import {
   Alert,
   Image,
   Keyboard,
-
-
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -57,108 +55,110 @@ export default function MensagemFormScreen() {
       style={styles.keyboardAvoidingContainer}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('./assets/logo.png')}
-              style={styles.logo}
-            />
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.container}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('./assets/logo.png')}
+                style={styles.logo}
+              />
+            </View>
+
+            <Text style={styles.title}>Digite sua mensagem no campo de texto abaixo</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.labelFixed}>De:</Text>
+              <TextInput
+                style={[styles.input, styles.inputDisabled]}
+                value={fromUser}
+                placeholderTextColor="#A9A9A9" 
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.labelFixed}>Para:</Text>
+              <TextInput
+                style={[styles.input, styles.inputDisabled]}
+                value={toUser}
+                placeholderTextColor="#A9A9A9" 
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <TextInput
+                style={styles.input} 
+                placeholder="Assunto:"
+                placeholderTextColor="#A9A9A9"
+                value={subject}
+                onChangeText={setSubject}
+              />
+            </View>
+
+            <View style={styles.textAreaContainer}>
+              <Text style={styles.label}>Mensagem:</Text>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Digite sua mensagem..."
+                placeholderTextColor="#A9A9A9" 
+                multiline
+                value={body}
+                onChangeText={setBody}
+                numberOfLines={4}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.button, isLoading && styles.buttonDisabled]}
+              onPress={handleSendMessage}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Enviar</Text>
+              )}
+            </TouchableOpacity>
           </View>
-
-          <Text style={styles.title}>Digite sua mensagem no campo de texto abaixo</Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.labelFixed}>De:</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={fromUser}
-              placeholderTextColor="#A9A9A9" 
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.labelFixed}>Para:</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={toUser}
-              placeholderTextColor="#A9A9A9" 
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.input} 
-              placeholder="Assunto:"
-              placeholderTextColor="#A9A9A9"
-              value={subject}
-              onChangeText={setSubject}
-            />
-          </View>
-
-          <View style={styles.textAreaContainer}>
-            <Text style={styles.label}>Mensagem:</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Digite sua mensagem..."
-              placeholderTextColor="#A9A9A9" 
-              multiline
-              value={body}
-              onChangeText={setBody}
-              numberOfLines={4}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleSendMessage}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
-            ) : (
-              <Text style={styles.buttonText}>Enviar</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoidingContainer: { 
+  keyboardAvoidingContainer: {
     flex: 1,
     backgroundColor: '#01923F',
   },
-  container: {
-    flex: 1, 
-    backgroundColor: '#01923F',
-    padding: 20,
-    paddingTop: 50,
+  scrollView: {
+    flex: 1,
   },
-  backButton: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    backgroundColor: '#FFA500',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
+  scrollContentContainer: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#01923F',
+    padding: 20, 
   },
   logoContainer: {
     alignItems: 'center',
-      transform: [{ translateX: -25 }],
-    marginBottom: 12,
+    transform: [{ translateX: -12}], 
+    marginBottom: 12, 
   },
   logo: {
-    width: 300,
-    height: 250,
+    width: 200, 
+    height: 140, 
     resizeMode: 'contain',
+    marginTop: -28,
+    marginLeft: 4,
   },
   title: {
     color: '#FFFFFF',
@@ -194,8 +194,6 @@ const styles = StyleSheet.create({
   inputDisabled: { 
     backgroundColor: '#F0F0F0',
     color: '#555555',          
-  
-  
   },
   textAreaContainer: {
     marginBottom: 20,
